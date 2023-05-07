@@ -12,24 +12,17 @@ let settings = {
 let visualizer = document.querySelector(".visualizer");
 let canvasContainer = document.querySelector(".canvas");
 let canvas, audioContext, mic, fft, pitch;
-let imgs = {};
 let notes = ["c0","c1","csharp","d","eflat","e","f0","f1","fsharp","g","gsharp","a0","a1","bflat","b0","b1","misc0","misc1","misc2","misc3"];
 function setup() {
 	canvas = createCanvas(canvasContainer.offsetWidth*2, (visualizer.offsetHeight-80)*2);
 	canvas.parent('canvas');
-	canvas.mousePressed(startVisualizer);
+	canvas.mousePressed(() => {startVisualizer(); startPitch();});
 	audioContext = getAudioContext();
 	mic = new p5.AudioIn();
-	mic.start(startPitch);
-	// Load in images
-	for (let i=0; i<5; i++) {
-		for (let j=0; j<20; j++) {
-			let imgName = `dist${i}-${notes[j]}`;
-			imgs[imgName] = loadImage(`assets/visualizer/${imgName}.svg`);
-		}
-	}
+	mic.start();
 	angleMode(DEGREES);
 	colorMode(HSB, 360, 100, 100, 1);
+	imageMode(CENTER);
 	background(0);
 }
 
@@ -49,12 +42,49 @@ function windowResized() {
 	background(0);
 }
 
+// Easing
+function easeInOutSine(x) {
+	return -(Math.cos(Math.PI * x) - 1) / 2;
+}
+
+// Visualizer image class
+let visualizerObjects = {};
+class VisualizerObject {
+	constructor(img) {
+		this.src = loadImage(`assets/visualizer/${img}.png`);
+		this.scaleDelta = settings["imageScale"]*width/2;
+		this.scaleMin = settings["imageScale"]*width/4;
+		this.rot = Math.random()*360;
+		this.rotVel = Math.random()*1-.5;
+		this.pos = [(width/2)*(Math.random()), (height/2)*(Math.random())];
+		this.vel = [Math.random()*10-5, Math.random()*10-5];
+		this.totalLife = 60+Math.random()*200;
+		this.lifespan = this.totalLife;
+		this.easing = 0;
+	}
+	drawImage() {
+		this.lifespan--;
+		this.pos = [this.pos[0]+this.vel[0], this.pos[1]+this.vel[1]];
+		this.rot = this.rot + this.rotVel;
+		this.easing = easeInOutSine(1-Math.abs(0.5-this.lifespan/this.totalLife)*2);
+		translate(width/2, height/2);
+		rotate(this.rot);
+		tint(255, this.easing);
+		image(this.src, this.pos[0], this.pos[1], this.scaleMin + this.scaleDelta*this.easing, this.scaleMin + this.scaleDelta*this.easing);
+		rotate(-this.rot);
+		translate(-width/2, -height/2);
+	}
+}
+
 // Main p5 loop
 let amplitude = 0;
 let activeNote = "unknown";
 let dist = 0;
+let objectId = 0;
+let delay = 0;
 function draw() {
-	background(360-settings["backgroundColor"]*360, 100, 100-settings["backgroundBrightness"]*100, .1);
+	background(360-settings["backgroundColor"]*360, 100, 100-settings["backgroundBrightness"]*100);
+	delay--;
 
 	// Set amplitude via mic sensitivity
 	amplitude = mic.getLevel()*settings["micSensitivity"]*2;
@@ -80,14 +110,36 @@ function draw() {
 		} else if (note == "low" || note == "high") {
 			note = "misc" + Math.floor(Math.random()*4);
 		}
-		let scale = (Math.random()*settings["imageScale"]*width/2);
-		image(imgs[`dist${dist}-${note}`], Math.random()*width, Math.random()*height, scale, scale);
+		if (delay <= 0) {
+			visualizerObjects[String(objectId)] = new VisualizerObject(`dist${dist}-${note}`);
+			objectId++;
+			delay = 10;
+		}
+	}
+
+	for (let key of Object.keys(visualizerObjects)) {
+		visualizerObjects[key].drawImage();
+		if (visualizerObjects[key].lifespan <= 0) {
+			delete visualizerObjects[key];
+		}
 	}
 }
 
 // Pitch detection
 let noteFrequencies = {
-	low: 246.942,
+	low: 61.74,
+	c2: 261.63/3,
+	csharp2: 277.183/3,
+	d2: 293.665/3,
+	eflat2: 311.127/3,
+	e2: 329.628/3,
+	f2: 349.228/3,
+	fsharp2: 369.994/3,
+	g2: 391.995/3,
+	gsharp2: 415.305/3,
+	a2: 440/3,
+	bflat2: 466.164/3,
+	b2: 493.883/3,
 	c3: 261.63/2,
 	csharp3: 277.183/2,
 	d3: 293.665/2,
