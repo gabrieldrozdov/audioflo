@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>AUDIOFLO</title>
+	<link rel="stylesheet" href="style.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/addons/p5.sound.min.js"></script>
+	<script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script>
+</head>
+<body>
+	<div class="container">
+		<button class="info-toggle" onclick="openInfo()">What’s AUDIOFLO?</button>
+		<div class="info">
+			<button class="info-close" onclick="closeInfo()"><img src="assets/ui/close.svg"></button>
+			<h2 class="info-heading">What’s AUDIOFLO?</h2>
+			<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+			<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+			<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+		</div>
+		
+		<header class="header">
+			<h1 class="title variable-type">AUDIOFLO</h1>
+		</header>
+	
+		<main class="visualizer">
+			<div class="canvas" id="canvas">
+				<div class="canvas-message">Click here to start AUDIOFLO</div>
+			</div>
+			<div class="controls">
+				<div class="controls-sliders">
+					<div id="slider1" class="controls-slider" data-setting="imageHue">
+						<div class="controls-slider-handle"><img src="assets/ui/button-swirl.svg" draggable="false"></div>
+						<div class="controls-slider-bar"></div>
+					</div>
+					<div id="slider2" class="controls-slider" data-setting="backgroundBrightness">
+						<div class="controls-slider-handle"><img src="assets/ui/button-swirl.svg" draggable="false"></div>
+						<div class="controls-slider-bar"></div>
+					</div>
+					<div id="slider3" class="controls-slider" data-setting="backgroundColor">
+						<div class="controls-slider-handle"><img src="assets/ui/button-swirl.svg" draggable="false"></div>
+						<div class="controls-slider-bar"></div>
+					</div>
+					<div id="slider4" class="controls-slider" data-setting="micSensitivity">
+						<div class="controls-slider-handle"><img src="assets/ui/button-chart.svg" draggable="false"></div>
+						<div class="controls-slider-bar"></div>
+					</div>
+					<div id="slider5" class="controls-slider" data-setting="imageDistortion">
+						<div class="controls-slider-handle"><img src="assets/ui/button-circle.svg" draggable="false"></div>
+						<div class="controls-slider-bar"></div>
+					</div>
+					<div id="slider6" class="controls-slider" data-setting="imageScale">
+						<div class="controls-slider-handle"><img src="assets/ui/button-circle.svg" draggable="false"></div>
+						<div class="controls-slider-bar"></div>
+					</div>
+				</div>
+				<div class="controls-buttons">
+					<button class="controls-button" onclick="resetSettings()"><img src="assets/ui/button-reset.svg"></button>
+					<button class="controls-button" onclick="toggleMute()"><img src="assets/ui/button-mute.svg"></button>
+					<button class="controls-button" onclick="downloadScreenshot()"><img src="assets/ui/button-download.svg"></button>
+				</div>
+			</div>
+		</main>
+	
+		<footer class="footer">
+			<p class="credit1 variable-type">BY MJ</p>
+			<p class="credit2">Website developed by <a href="https://www.gabrieldrozdov.com/" target="_blank">Gabriel Drozdov</a></p>
+		</footer>
+	
+		<div class="background"></div>
+	</div>
+	<script src="script.js"></script>
+</body>
+</html>
