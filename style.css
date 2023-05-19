@@ -125,7 +125,8 @@ body {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	z-index: 0;
+	position: relative;
+	z-index: 1;
 }
 .title {
 	font-family: Audioflo, sans-serif;
@@ -336,6 +337,8 @@ body {
 	justify-content: center;
 	flex-direction: column;
 	gap: 20px;
+	position: relative;
+	z-index: 1;
 }
 .credit1 {
 	font-family: Audioflo, sans-serif;
@@ -363,7 +366,7 @@ body {
 	left: 0;
 	width: 100vw;
 	height: 100vh;
-	z-index: 1;
+	z-index: 0;
 	overflow: hidden;
 	pointer-events: none;
 }

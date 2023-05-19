@@ -38,7 +38,7 @@ function startVisualizer() {
 
 // Resize canvas
 function windowResized() {
-	resizeCanvas(canvasContainer.offsetWidth*2, (visualizer.offsetHeight-80)*2);
+	resizeCanvas(canvasContainer.offsetWidth, (visualizer.offsetHeight-80));
 	background(0);
 }
 
@@ -46,14 +46,17 @@ function windowResized() {
 function easeInOutSine(x) {
 	return -(Math.cos(Math.PI * x) - 1) / 2;
 }
+function easeInOutQuart(x) {
+	return x < 0.5 ? 8 * x * x * x * x : 1 - Math.pow(-2 * x + 2, 4) / 2;
+}
 
 // Visualizer image class
 let visualizerObjects = {};
 class VisualizerObject {
 	constructor(img) {
 		this.src = loadImage(`assets/visualizer/${img}.png`);
-		this.scaleDelta = settings["imageScale"]*width/2;
-		this.scaleMin = settings["imageScale"]*width/4;
+		this.scaleDelta = settings["imageScale"]*width/2+10;
+		this.scaleMin = 0;
 		this.rot = Math.random()*360;
 		this.rotVel = Math.random()*1-.5;
 		this.pos = [(width/2)*(Math.random()), (height/2)*(Math.random())];
@@ -69,7 +72,7 @@ class VisualizerObject {
 		this.easing = easeInOutSine(1-Math.abs(0.5-this.lifespan/this.totalLife)*2);
 		translate(width/2, height/2);
 		rotate(this.rot);
-		tint(255, this.easing);
+		// tint(255, this.easing);
 		image(this.src, this.pos[0], this.pos[1], this.scaleMin + this.scaleDelta*this.easing, this.scaleMin + this.scaleDelta*this.easing);
 		rotate(-this.rot);
 		translate(-width/2, -height/2);
@@ -77,7 +80,6 @@ class VisualizerObject {
 }
 
 // Main p5 loop
-let amplitude = 0;
 let activeNote = "unknown";
 let dist = 0;
 let objectId = 0;
@@ -85,9 +87,6 @@ let delay = 0;
 function draw() {
 	background(360-settings["backgroundColor"]*360, 100, 100-settings["backgroundBrightness"]*100);
 	delay--;
-
-	// Set amplitude via mic sensitivity
-	amplitude = mic.getLevel()*settings["micSensitivity"]*2;
 
 	// Set image distortion level
 	if (settings["imageDistortion"] < .2) {
@@ -103,18 +102,24 @@ function draw() {
 	}
 
 	// Draw images
-	if (activeNote != "unknown") {
-		let note = activeNote.replace(/[0-9]/g, '');
-		if (note == "c" || note == "f" || note == "a" || note == "b") {
-			note = note + Math.floor(Math.random()*2);
-		} else if (note == "low" || note == "high") {
-			note = "misc" + Math.floor(Math.random()*4);
+	let note = "misc" + Math.floor(Math.random()*4);
+	if (mic.getLevel() > .05) {
+		if (activeNote != "unknown") {
+			note = activeNote.replace(/[0-9]/g, '');
+			if (note == "c" || note == "f" || note == "a" || note == "b") {
+				note = note + Math.floor(Math.random()*2);
+			} else if (note == "low" || note == "high") {
+				note = "misc" + Math.floor(Math.random()*4);
+			}
 		}
+	
+		// Quantity of images
 		if (delay <= 0) {
 			visualizerObjects[String(objectId)] = new VisualizerObject(`dist${dist}-${note}`);
 			objectId++;
-			delay = 10;
+			delay = 20 - settings["micSensitivity"]*20;
 		}
+		console.log(delay);
 	}
 
 	for (let key of Object.keys(visualizerObjects)) {
@@ -127,19 +132,21 @@ function draw() {
 
 // Pitch detection
 let noteFrequencies = {
-	low: 61.74,
-	c2: 261.63/3,
-	csharp2: 277.183/3,
-	d2: 293.665/3,
-	eflat2: 311.127/3,
-	e2: 329.628/3,
-	f2: 349.228/3,
-	fsharp2: 369.994/3,
-	g2: 391.995/3,
-	gsharp2: 415.305/3,
-	a2: 440/3,
-	bflat2: 466.164/3,
-	b2: 493.883/3,
+	low: 493.883/8,
+
+	c2: 261.63/4,
+	csharp2: 277.183/4,
+	d2: 293.665/4,
+	eflat2: 311.127/4,
+	e2: 329.628/4,
+	f2: 349.228/4,
+	fsharp2: 369.994/4,
+	g2: 391.995/4,
+	gsharp2: 415.305/4,
+	a2: 440/4,
+	bflat2: 466.164/4,
+	b2: 493.883/4,
+
 	c3: 261.63/2,
 	csharp3: 277.183/2,
 	d3: 293.665/2,
@@ -152,6 +159,7 @@ let noteFrequencies = {
 	a3: 440/2,
 	bflat3: 466.164/2,
 	b3: 493.883/2,
+
 	c4: 261.63,
 	csharp4: 277.183,
 	d4: 293.665,
@@ -164,6 +172,7 @@ let noteFrequencies = {
 	a4: 440,
 	bflat4: 466.164,
 	b4: 493.883,
+
 	c5: 261.63*2,
 	csharp5: 277.183*2,
 	d5: 293.665*2,
@@ -176,31 +185,21 @@ let noteFrequencies = {
 	a5: 440*2,
 	bflat5: 466.164*2,
 	b5: 493.883*2,
-	c6: 261.63*3,
-	csharp6: 277.183*3,
-	d6: 293.665*3,
-	eflat6: 311.127*3,
-	e6: 329.628*3,
-	f6: 349.228*3,
-	fsharp6: 369.994*3,
-	g6: 391.995*3,
-	gsharp6: 415.305*3,
-	a6: 440*3,
-	bflat6: 466.164*3,
-	b6: 493.883*3,
-	c7: 261.63*4,
-	csharp7: 277.183*4,
-	d7: 293.665*4,
-	eflat7: 311.127*4,
-	e7: 329.628*4,
-	f7: 349.228*4,
-	fsharp7: 369.994*4,
-	g7: 391.995*4,
-	gsharp7: 415.305*4,
-	a7: 440*4,
-	bflat7: 466.164*4,
-	b7: 493.883*4,
-	high: 1308.15
+
+	c6: 261.63*4,
+	csharp6: 277.183*4,
+	d6: 293.665*4,
+	eflat6: 311.127*4,
+	e6: 329.628*4,
+	f6: 349.228*4,
+	fsharp6: 369.994*4,
+	g6: 391.995*4,
+	gsharp6: 415.305*4,
+	a6: 440*4,
+	bflat6: 466.164*4,
+	b6: 493.883*4,
+
+	high: 261.63*8
 }
 function startPitch() {
 	pitch = ml5.pitchDetection('pitchmodel/', audioContext , mic.stream, getPitch);
@@ -212,20 +211,25 @@ function getPitch() {
 		} else {
 			activeNote = "unknown";
 		}
+		console.log(activeNote);
 		getPitch();
 	})
 }
 // Detect closest note to frequency
 function detectNote(freq) {
 	let keys = Object.keys(noteFrequencies);
+	console.log(freq);
 	for (let i=0; i<keys.length; i++) {
 		if (freq < noteFrequencies[keys[i]]) {
 			if (i == 0) {
+				console.log(keys[i])
 				return keys[i];
 			}
 			if (noteFrequencies[keys[i]]-freq > freq-noteFrequencies[keys[i-1]]) {
+				console.log(keys[i-1])
 				return keys[i-1];
 			} else {
+				console.log(keys[i])
 				return keys[i];
 			}
 		}
@@ -322,7 +326,7 @@ function backgroundAnimation() {
 	let backgroundElement = document.createElement("img");
 	backgroundElement.src = `assets/background/background${Math.floor(Math.random()*9+1)}.svg`
 
-	let duration = Math.random()*5+3;
+	let duration = Math.random()*10+5;
 	let pos = [Math.random()*80-20, Math.random()*50-20];
 	let rot = Math.random()*360;
 	backgroundElement.style.width = Math.random()*30+30 + "vw";
@@ -349,7 +353,15 @@ function backgroundAnimation() {
 
 	setTimeout(() => {
 		backgroundAnimation();
-	}, Math.random()*3000+1500)
+	}, Math.random()*4000+2000)
 }
 backgroundAnimation();
-backgroundAnimation();
+
+// Pause if user leaves page
+document.addEventListener("visibilitychange", (event) => {
+	if (document.visibilityState == "visible") {
+		loop();
+	} else {
+		noLoop();
+	}
+  });
