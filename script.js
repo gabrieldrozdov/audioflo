@@ -16,10 +16,10 @@ let notes = ["c0","c1","csharp","d","eflat","e","f0","f1","fsharp","g","gsharp",
 function setup() {
 	canvas = createCanvas(canvasContainer.offsetWidth*2, (visualizer.offsetHeight-80)*2);
 	canvas.parent('canvas');
-	canvas.mousePressed(() => {startVisualizer(); startPitch();});
 	audioContext = getAudioContext();
 	mic = new p5.AudioIn();
 	mic.start();
+	canvas.mousePressed(() => {startVisualizer(); startPitch();});
 	angleMode(DEGREES);
 	colorMode(HSB, 360, 100, 100, 1);
 	imageMode(CENTER);
@@ -85,6 +85,9 @@ let dist = 0;
 let objectId = 0;
 let delay = 0;
 function draw() {
+	let p5Canvas = document.querySelector("canvas");
+	p5Canvas.style.filter = `hue-rotate(${settings["imageHue"]*360-180}deg)`;
+
 	background(360-settings["backgroundColor"]*360, 100, 100-settings["backgroundBrightness"]*100);
 	delay--;
 
@@ -103,7 +106,7 @@ function draw() {
 
 	// Draw images
 	let note = "misc" + Math.floor(Math.random()*4);
-	if (mic.getLevel() > .05) {
+	if (mic.getLevel() > .02) {
 		if (activeNote != "unknown") {
 			note = activeNote.replace(/[0-9]/g, '');
 			if (note == "c" || note == "f" || note == "a" || note == "b") {
@@ -119,7 +122,6 @@ function draw() {
 			objectId++;
 			delay = 20 - settings["micSensitivity"]*20;
 		}
-		console.log(delay);
 	}
 
 	for (let key of Object.keys(visualizerObjects)) {
@@ -211,25 +213,20 @@ function getPitch() {
 		} else {
 			activeNote = "unknown";
 		}
-		console.log(activeNote);
 		getPitch();
 	})
 }
 // Detect closest note to frequency
 function detectNote(freq) {
 	let keys = Object.keys(noteFrequencies);
-	console.log(freq);
 	for (let i=0; i<keys.length; i++) {
 		if (freq < noteFrequencies[keys[i]]) {
 			if (i == 0) {
-				console.log(keys[i])
 				return keys[i];
 			}
 			if (noteFrequencies[keys[i]]-freq > freq-noteFrequencies[keys[i-1]]) {
-				console.log(keys[i-1])
 				return keys[i-1];
 			} else {
-				console.log(keys[i])
 				return keys[i];
 			}
 		}

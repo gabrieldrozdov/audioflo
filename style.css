@@ -159,6 +159,7 @@ body {
 .canvas canvas {
 	width: 100% !important;
 	height: 100% !important;
+	z-index: 0;
 }
 .canvas-message {
 	position: absolute;
@@ -176,6 +177,7 @@ body {
 	pointer-events: none;
 	text-align: center;
 	line-height: 1.2em;
+	z-index: 9;
 	transition: background-color .2s;
 }
 .canvas:hover .canvas-message {
